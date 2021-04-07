@@ -42,7 +42,7 @@ webix.ui({
             view:"datatable",
             id:"filmsList",
             autoConfig: true,
-            scroll: "y",
+            scroll:"y",
             data: small_film_set
           },
           {
