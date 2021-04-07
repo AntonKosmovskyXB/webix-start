@@ -11,11 +11,11 @@ webix.ui({
   rows:[
     {
       view:"toolbar",
-      id: "headerToolbar",
+      id:"headerToolbar",
       css:"webix_dark",
       paddingX: 10,
       elements: [
-        {view: "label", label:"My App", id:"myAppLabel"},
+        {view:"label", label:"My App", id:"myAppLabel"},
         {},
         {view:"button", type:"icon", icon:"wxi-user", label:"Profile", id:"profileButton", 
         css: "webix_transparent", width: 100}
@@ -23,13 +23,13 @@ webix.ui({
       {
         cols:[
           {
-            view: "list",
-            id: "appList",
+            view:"list",
+            id:"appList",
             minWidth: 150,
             width: 220,
             scroll: false,
             select: true,
-            css: "app-list",
+            css:"app-list",
             data:[
               {value:"Dashboard", id:"appDashboard"},
               {value:"Users", id:"appUsers"},
@@ -46,8 +46,8 @@ webix.ui({
             data: small_film_set
           },
           {
-            view: "form",
-            id: "filmsSearchForm",
+            view:"form",
+            id:"filmsSearchForm",
             width: 300,
             elements: [
               {template:"EDIT FILMS", type:"section"},
