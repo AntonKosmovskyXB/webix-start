@@ -12,21 +12,21 @@ const header = {
     css:"webix_dark",
     paddingX: 10,
     elements: [
-      {view:"label", label:"My App"},
-      {},
-      {
-	view:"button", 
-	type:"icon", 
-	icon:"wxi-user", 
-	label:"Profile", 
-        css: "webix_transparent", 
-	width: 100
-      }
-   ]
+        {view:"label", label:"My App"},
+        {},
+        {
+            view:"button", 
+	        type:"icon", 
+	        icon:"wxi-user", 
+	        label:"Profile", 
+            css: "webix_transparent", 
+	        width: 100
+        }
+    ]
 };
 	      
 const main = {
-    cols:[
+    cols:[ 
         {
             view:"list",
             minWidth: 150,
@@ -35,35 +35,60 @@ const main = {
             select: true,
             css:"app-list",
             data:[
-              {value:"Dashboard"},
-              {value:"Users"},
-              {value:"Products"},
-              {value:"Locations"},
+                {value:"Dashboard"},
+                {value:"Users"},
+                {value:"Products"},
+                {value:"Locations"},
             ]
-          },
-          { view:"resizer"},
-          {
+        },
+        {view:"resizer"},
+        {
             view:"datatable",
+            id:"filmsDatatable",
             autoConfig: true,
             scroll:"y",
             data: small_film_set
-          },
-          {
+        },
+        {
             view:"form",
-            width: 300,
+            id:"filmsForm",
+            width: 350,
             elements: [
-              {template:"edit films", type:"section"},
-              {view:"text", label:"Title"},
-              {view:"text", label:"Year"},
-              {view:"text", label:"Rating"},
-              {view:"text", label:"Votes"},
-              {margin: 10, cols: [
-                {view:"button", value:"Add new", css:"webix_primary"},
-                {view:"button", value:"Clear"}
-              ]},
-              {}
-          ]
-       },
+                {template:"edit films", type:"section"},
+                {view:"text", label:"Title", name:"title", invalidMessage:"Field must be filled in"},
+                {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
+                {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
+                {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
+                {margin: 10, cols: [
+                    {
+                        view:"button", 
+                        value:"Add new", 
+                        css:"webix_primary", 
+                        id:"addButton",
+                        click: addItem
+                    },
+                    {
+                        view:"button", 
+                        value:"Clear", 
+                        id:"clearButton",
+                        click: clearForm
+                    }
+                ]},
+                {}
+            ],
+            rules: {
+                title: webix.rules.isNotEmpty,
+                year: function(value) {
+                    return (value >= 1970 && value <= 2021);
+                },
+                rating: function(value) {
+                    return value > 0 && webix.rules.isNotEmpty;
+                },
+                votes: function(value) {
+                    return value < 100000;
+                }
+            },
+        },
     ],
 };
 	    
@@ -73,10 +98,34 @@ const footer = {
     height: 30
 };
 
+function addItem() {
+    const filmsForm = $$("filmsForm");
+    const filmsDatatable = $$("filmsDatatable");
+    const formData = filmsForm.getValues();
+    const validationResult = filmsForm.validate();
+
+    if (validationResult) {
+        filmsDatatable.add(formData);
+        webix.message("Form Successfully validated");  
+    }
+}
+
+function clearForm() {
+    const filmsForm = $$("filmsForm");
+    webix.confirm({
+        text: "Do you want to clear this form?"
+    }).then(
+        function(){
+            filmsForm.clear();
+            filmsForm.clearValidation();  
+        }
+    )
+}
+
  webix.ui({
-     rows: [
-         header,
-         main,
-         footer
-     ]
+    rows: [
+        header,
+        main,
+        footer
+    ]
  });
