@@ -19,7 +19,6 @@ const header = {
 	type:"icon", 
 	icon:"wxi-user", 
 	label:"Profile", 
-	id:"profileButton", 
         css: "webix_transparent", 
 	width: 100
       }
@@ -30,40 +29,37 @@ const main = {
     cols:[
         {
             view:"list",
-            id:"appList",
             minWidth: 150,
             width: 220,
             scroll: false,
             select: true,
             css:"app-list",
             data:[
-              {value:"Dashboard", id:"appDashboard"},
-              {value:"Users", id:"appUsers"},
-              {value:"Products", id:"appProducts"},
-              {value:"Locations", id:"appLocations"},
+              {value:"Dashboard"},
+              {value:"Users"},
+              {value:"Products"},
+              {value:"Locations"},
             ]
           },
           { view:"resizer"},
           {
             view:"datatable",
-            id:"filmsList",
             autoConfig: true,
             scroll:"y",
             data: small_film_set
           },
           {
             view:"form",
-            id:"filmsSearchForm",
             width: 300,
             elements: [
               {template:"edit films", type:"section"},
-              {view:"text", label:"Title", id:"filmTitle"},
-              {view:"text", label:"Year", id:"filmYear"},
-              {view:"text", label:"Rating", id:"filmRating"},
-              {view:"text", label:"Votes", id:"filmVotes"},
+              {view:"text", label:"Title"},
+              {view:"text", label:"Year"},
+              {view:"text", label:"Rating"},
+              {view:"text", label:"Votes"},
               {margin: 10, cols: [
-                {view:"button", value:"Add new", css:"webix_primary", id:"addFilm"},
-                {view:"button", value:"Clear", id:"clearTable"}
+                {view:"button", value:"Add new", css:"webix_primary"},
+                {view:"button", value:"Clear"}
               ]},
               {}
           ]
@@ -81,6 +77,6 @@ const footer = {
      rows: [
          header,
          main,
-         footer,
+         footer
      ]
  });
