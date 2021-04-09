@@ -19,8 +19,8 @@ const header = {
 	        type:"icon", 
 	        icon:"wxi-user", 
 	        label:"Profile", 
-            css: "webix_transparent", 
-            popup: "profilePopup",
+            	css: "webix_transparent", 
+            	popup: "profilePopup",
 	        width: 100
         }
     ]
