@@ -65,13 +65,11 @@ const main = {
                         view:"button", 
                         value:"Add new", 
                         css:"webix_primary", 
-                        id:"addButton",
                         click: addItem
                     },
                     {
                         view:"button", 
                         value:"Clear", 
-                        id:"clearButton",
                         click: clearForm
                     }
                 ]},
@@ -126,9 +124,8 @@ function clearForm() {
 webix.ui({
     view:"popup",
     id: "profilePopup",
-    width: 300, 
-    height: 70,
-    select: true,
+    width: 300,
+    autoheight: true,
     body: {
         view: "list",
         scroll: false,
