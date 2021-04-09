@@ -20,24 +20,8 @@ const header = {
 	        icon:"wxi-user", 
 	        label:"Profile", 
             css: "webix_transparent", 
-	        width: 100,
-            click: function() {
-                webix.ui({
-                    view:"popup", 
-                    width: 300, 
-                    height: 70,
-                    left: 0,
-                    top: 40,
-                    body: {
-                        view: "list",
-                        scroll: false,
-                        data: [
-                            {value: "Settings"},
-                            {value: "Log out"}
-                        ]
-                    }
-                }).show();
-            }
+            popup: "profilePopup",
+	        width: 100
         }
     ]
 };
@@ -138,6 +122,22 @@ function clearForm() {
         }
     )
 }
+
+webix.ui({
+    view:"popup",
+    id: "profilePopup",
+    width: 300, 
+    height: 70,
+    select: true,
+    body: {
+        view: "list",
+        scroll: false,
+        data: [
+            {value: "Settings"},
+            {value: "Log out"}
+        ]
+    } 
+});
 
  webix.ui({
     rows: [
