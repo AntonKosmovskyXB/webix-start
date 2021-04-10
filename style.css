@@ -5,3 +5,7 @@
 .app-list {
     background: #eeeeee;
 }
+
+.row-hover.webix_cell {
+    background: #F4F5F9;
+}

@@ -1,12 +1,3 @@
-const small_film_set = [
-	{ title:"The Shawshank Redemption", year:1994, votes:678790, rating:9.2, rank:1, category:"Thriller"},
-	{ title:"The Godfather", year:1972, votes:511495, rating:9.2, rank:2, category:"Crime"},
-	{ title:"The Godfather: Part II", year:1974, votes:319352, rating:9.0, rank:3, category:"Crime"},
-	{ title:"The Good, the Bad and the Ugly", year:1966, votes:213030, rating:8.9, rank:4, category:"Western"},
-	{ title:"Pulp fiction", year:1994, votes:533848, rating:8.9, rank:5, category:"Crime"},
-	{ title:"12 Angry Men", year:1957, votes:164558, rating:8.9, rank:6, category:"Western"}
-];
-
 const header = {
     view:"toolbar",
     css:"webix_dark",
@@ -19,8 +10,8 @@ const header = {
 	        type:"icon", 
 	        icon:"wxi-user", 
 	        label:"Profile", 
-            	css: "webix_transparent", 
-            	popup: "profilePopup",
+            css: "webix_transparent", 
+            popup: "profilePopup",
 	        width: 100
         }
     ]
@@ -46,9 +37,22 @@ const main = {
         {
             view:"datatable",
             id:"filmsDatatable",
-            autoConfig: true,
+            hover: "row-hover",
+            select: true,
+            columns:[
+                {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
+                {id:"title", header:["Film title", {content:"textFilter"} ], headermenu: false, fillspace: true, sort: "text"},
+                {id:"year", header:["Realised", {content:"textFilter"} ], sort: "int"},
+                {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
+                {template:"<span class='webix_icon wxi-trash'></span>"},
+            ],
             scroll:"y",
-            data: small_film_set
+            url: "data.js",
+            onClick:{
+                "wxi-trash": function(event, id){
+                    this.remove(id);
+                }
+              } 
         },
         {
             view:"form",
@@ -104,8 +108,12 @@ function addItem() {
     const validationResult = filmsForm.validate();
 
     if (validationResult) {
-        filmsDatatable.add(formData);
-        webix.message("Form Successfully validated");  
+        if (formData.id) {
+            filmsDatatable.updateItem(formData.id, formData)
+        } else {
+            filmsDatatable.add(formData);
+            webix.message("Form Successfully validated");  
+        }   
     }
 }
 
@@ -114,7 +122,7 @@ function clearForm() {
     webix.confirm({
         text: "Do you want to clear this form?"
     }).then(
-        function(){
+        function() {
             filmsForm.clear();
             filmsForm.clearValidation();  
         }
@@ -125,9 +133,9 @@ webix.ui({
     view:"popup",
     id: "profilePopup",
     width: 300,
-    autoheight: true,
     body: {
         view: "list",
+        autoheight: true,
         scroll: false,
         data: [
             {value: "Settings"},
@@ -136,10 +144,15 @@ webix.ui({
     } 
 });
 
- webix.ui({
+webix.ui({
     rows: [
         header,
         main,
         footer,
     ]
- });
+}); 
+
+$$("filmsDatatable").attachEvent("onAfterSelect", function(id){
+    const choosedFilm = $$("filmsDatatable").getItem(id);
+    $$("filmsForm").setValues(choosedFilm);
+});
