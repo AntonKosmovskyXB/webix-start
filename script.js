@@ -17,89 +17,113 @@ const header = {
     ]
 };
 	      
-const main = {
-    cols:[ 
-        {
-            view:"list",
-            minWidth: 150,
-            width: 220,
-            scroll: false,
-            select: true,
-            css:"app-list",
-            data:[
-                {value:"Dashboard"},
-                {value:"Users"},
-                {value:"Products"},
-                {value:"Locations"},
-            ]
-        },
-        {view:"resizer"},
-        {
-            view:"datatable",
-            id:"filmsDatatable",
-            hover: "row-hover",
-            select: true,
-            columns:[
-                {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
-                {id:"title", header:["Film title", {content:"textFilter"} ], headermenu: false, fillspace: true, sort: "text"},
-                {id:"year", header:["Realised", {content:"textFilter"} ], sort: "int"},
-                {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
-                {template:"<span class='webix_icon wxi-trash'></span>"},
-            ],
-            scroll:"y",
-            url: "data.js",
-            onClick:{
-                "wxi-trash": function(event, id){
-                    this.remove(id);
-                }
-              } 
-        },
-        {
-            view:"form",
-            id:"filmsForm",
-            width: 350,
-            elements: [
-                {template:"edit films", type:"section"},
-                {view:"text", label:"Title", name:"title", invalidMessage:"Field must be filled in"},
-                {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
-                {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
-                {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
-                {margin: 10, cols: [
-                    {
-                        view:"button", 
-                        value:"Add new", 
-                        css:"webix_primary", 
-                        click: addItem
-                    },
-                    {
-                        view:"button", 
-                        value:"Clear", 
-                        click: clearForm
-                    }
-                ]},
-                {}
-            ],
-            rules: {
-                title: webix.rules.isNotEmpty,
-                year: function(value) {
-                    return (value >= 1970 && value <= 2021);
-                },
-                rating: function(value) {
-                    return value > 0 && webix.rules.isNotEmpty;
-                },
-                votes: function(value) {
-                    return value < 100000;
-                }
-            },
-        },
-    ],
+const list = { 
+    view:"list",
+    id:"menuList",
+    minWidth: 150,
+    width: 220,
+    scroll: false,
+    select: true,
+    css:"app-list",
+    data:["Dashboard", "Users", "Products", "Locations"]
 };
-	    
+
+const resizer = {
+    view:"resizer"
+};
+        
+const datatable = {
+    view:"datatable",
+    id:"filmsDatatable",
+    hover: "row-hover",
+    select: true,
+    columns:[
+        {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
+        {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
+        {id:"year", header:["Realised", {content:"textFilter"} ], sort: "int"},
+        {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
+        {template:"<span class='webix_icon wxi-trash'></span>"},
+    ],
+    scroll:"y",
+    url: "data.js",
+    onClick:{
+        "wxi-trash": function(event, id){
+            this.remove(id);
+        }
+    } 
+};
+
+const form =  {
+    view:"form",
+    id:"filmsForm",
+    width: 350,
+    elements: [
+        {template:"edit films", type:"section"},
+        {view:"text", label:"Title", name:"title", invalidMessage:"Field must be filled in"},
+        {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
+        {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
+        {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
+        {margin: 10, cols: [
+            {
+                view:"button", 
+                value:"Add new", 
+                css:"webix_primary", 
+                click: addItem
+            },
+            {
+                view:"button", 
+                value:"Clear", 
+                click: clearForm
+            }
+        ]},
+        {}
+    ],
+    rules: {
+        title: webix.rules.isNotEmpty,
+        year: function(value) {
+            return (value >= 1970 && value <= 2021);
+        },
+        rating: function(value) {
+            return value > 0 && webix.rules.isNotEmpty;
+        },
+        votes: function(value) {
+            return value < 100000;
+        }
+    },
+};
+
+const productsTree = {
+    view:"treetable",
+    id: "productsTree",
+    select:true,
+    url:"products.js",
+    fillspace: true,
+    columns: [
+        {id: "id", header:""},
+        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true},
+        {id: "price", header: "Price"}
+    ],
+    on: {
+        onAfterLoad: function() {
+            this.openAll();
+        }
+    }
+}
+  
 const footer = {
     template:"The software is provided by <a href='https://webix.com' target='_blank'>https://webix.com</a>. All rights reserved (c)", 
     css:"app-footer", 
     height: 30
 };
+
+const multiview = {
+    view: "multiview",
+    cells: [
+        {id: "Dashboard", cols: [datatable, form]},
+        {id: "Users", template: "Users"},
+        {id: "Products", cols:[productsTree]}
+    ]
+}
 
 function addItem() {
     const filmsForm = $$("filmsForm");
@@ -147,7 +171,13 @@ webix.ui({
 webix.ui({
     rows: [
         header,
-        main,
+        {
+            cols:[
+                list,
+                resizer,
+                multiview
+            ],
+        },
         footer,
     ]
 }); 
@@ -155,4 +185,8 @@ webix.ui({
 $$("filmsDatatable").attachEvent("onAfterSelect", function(id){
     const choosedFilm = $$("filmsDatatable").getItem(id);
     $$("filmsForm").setValues(choosedFilm);
+});
+
+$$("menuList").attachEvent("onAfterSelect", function(id){
+    $$(id).show();
 });
