@@ -94,7 +94,6 @@ const form =  {
 
 const productsTree = {
     view:"treetable",
-    id: "productsTree",
     select:true,
     url:"products.js",
     fillspace: true,
@@ -260,5 +259,3 @@ $$("usersList").attachEvent("onAfterLoad", function() {
         $$("usersList").$view.children[0].children[i].classList.add("green-background");
     }
 })
-
-$$("menuList").select("Users");
