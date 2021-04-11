@@ -109,6 +109,65 @@ const productsTree = {
         }
     }
 }
+
+const usersList = {
+    rows:[
+        {
+            cols:[
+                {
+                    view:"toolbar",
+                    rows:[
+                      {view:"text", id:"usersListFilterField"}
+                    ]
+                },
+                {
+                    view:"button", 
+                    label:"Sort asc", 
+                    css:"webix_primary", 
+                    width: 150,
+                    click: function() {
+                        $$("usersList").sort("#name#", "asc");
+                    }
+            },
+                {
+                    view:"button", 
+                    label:"Sort desc", 
+                    css:"webix_primary", 
+                    width: 150,
+                    click: function() {
+                        $$("usersList").sort("#name#", "desc");
+                    }
+                }
+            ]
+        },
+        {
+            view:"list",
+            id:"usersList",
+            select:true,
+            maxHeight: 250,
+            css:"users-list",
+            url:"users.js",
+            template:"#name# from #country# <span class='webix_icon wxi-close'></span>",
+            onClick:{
+                "wxi-close": function(event, id){
+                    this.remove(id);
+                }
+            }
+        }
+    ]
+}
+
+const usersChart = {
+    view:"chart",
+    type:"bar",
+    value:"#age#",
+    label:"#age#",
+    url: "users.js",
+    xAxis:{
+        title: "Age",
+        template: "#age#",
+    },
+};
   
 const footer = {
     template:"The software is provided by <a href='https://webix.com' target='_blank'>https://webix.com</a>. All rights reserved (c)", 
@@ -120,7 +179,7 @@ const multiview = {
     view: "multiview",
     cells: [
         {id: "Dashboard", cols: [datatable, form]},
-        {id: "Users", template: "Users"},
+        {id: "Users", rows:[usersList, usersChart]},
         {id: "Products", cols:[productsTree]}
     ]
 }
@@ -167,7 +226,7 @@ webix.ui({
         ]
     } 
 });
-
+  
 webix.ui({
     rows: [
         header,
@@ -183,10 +242,23 @@ webix.ui({
 }); 
 
 $$("filmsDatatable").attachEvent("onAfterSelect", function(id){
-    const choosedFilm = $$("filmsDatatable").getItem(id);
+    const choosedFilm = this.getItem(id);
     $$("filmsForm").setValues(choosedFilm);
 });
 
 $$("menuList").attachEvent("onAfterSelect", function(id){
     $$(id).show();
 });
+
+$$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
+    const filterFieldValue = this.getValue();
+    $$("usersList").filter("#name#", filterFieldValue);
+});
+
+$$("usersList").attachEvent("onAfterLoad", function() {
+    for (let i = 0; i < 5; i++) {
+        $$("usersList").$view.children[0].children[i].classList.add("green-background");
+    }
+})
+
+$$("menuList").select("Users");
