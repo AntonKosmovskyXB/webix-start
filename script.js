@@ -17,7 +17,7 @@ const header = {
     ]
 };
 	      
-const list = { 
+const menuList = { 
     view:"list",
     id:"menuList",
     minWidth: 150,
@@ -230,7 +230,7 @@ webix.ui({
         header,
         {
             cols:[
-                list,
+                menuList,
                 resizer,
                 multiview
             ],
@@ -253,8 +253,10 @@ $$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
     $$("usersList").filter("#name#", filterFieldValue);
 });
 
-$$("usersList").attachEvent("onAfterLoad", function() {
-    for (let i = 0; i < 5; i++) {
-        $$("usersList").$view.children[0].children[i].classList.add("green-background");
+$$("menuList").attachEvent("onAfterSelect", function() {
+    if ($$("menuList").isSelected("Users")) {
+        for (let i = 0; i < 5; i++) {
+            $$("usersList").$view.children[0].children[i].classList.add("green-background");
+        }
     }
-})
+});
