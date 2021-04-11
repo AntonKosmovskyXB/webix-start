@@ -95,8 +95,8 @@ const form =  {
 const productsTree = {
     view:"treetable",
     select:true,
-    url:"products.js",
     fillspace: true,
+    url:"products.js",
     columns: [
         {id: "id", header:""},
         {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true},
@@ -160,7 +160,6 @@ const usersChart = {
     view:"chart",
     type:"bar",
     value:"#age#",
-    label:"#age#",
     url: "users.js",
     xAxis:{
         title: "Age",
