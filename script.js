@@ -256,9 +256,7 @@ $$("filmsDatatable").attachEvent("onAfterSelect", function(id){
 });
 
 $$("menuList").attachEvent("onAfterSelect", function(id){
-    if ($$(id)) {
-        $$(id).show();
-    }
+    $$(id).show();
 });
 
 $$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
