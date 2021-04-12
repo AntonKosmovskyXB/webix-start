@@ -5,3 +5,16 @@
 .app-list {
     background: #eeeeee;
 }
+
+.row-hover.webix_cell {
+    background: #F4F5F9;
+}
+
+.users-list .webix_list_item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.users-list .webix_list_item:nth-child(-n+5) {
+    background: #a5fadd;
+}

@@ -1,12 +1,3 @@
-const small_film_set = [
-	{ title:"The Shawshank Redemption", year:1994, votes:678790, rating:9.2, rank:1, category:"Thriller"},
-	{ title:"The Godfather", year:1972, votes:511495, rating:9.2, rank:2, category:"Crime"},
-	{ title:"The Godfather: Part II", year:1974, votes:319352, rating:9.0, rank:3, category:"Crime"},
-	{ title:"The Good, the Bad and the Ugly", year:1966, votes:213030, rating:8.9, rank:4, category:"Western"},
-	{ title:"Pulp fiction", year:1994, votes:533848, rating:8.9, rank:5, category:"Crime"},
-	{ title:"12 Angry Men", year:1957, votes:164558, rating:8.9, rank:6, category:"Western"}
-];
-
 const header = {
     view:"toolbar",
     css:"webix_dark",
@@ -26,76 +17,180 @@ const header = {
     ]
 };
 	      
-const main = {
-    cols:[ 
+const menuList = { 
+    view:"list",
+    id:"menuList",
+    minWidth: 150,
+    width: 220,
+    scroll: false,
+    select: true,
+    css:"app-list",
+    data:["Dashboard", "Users", "Products", "Admin"]
+};
+
+const resizer = {
+    view:"resizer"
+};
+        
+const datatable = {
+    view:"datatable",
+    id:"filmsDatatable",
+    hover: "row-hover",
+    select: true,
+    columns:[
+        {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
+        {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
+        {id:"year", header:["Realised", {content:"textFilter"} ], sort: "int"},
+        {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
+        {template:"<span class='webix_icon wxi-trash'></span>"},
+    ],
+    scroll:"y",
+    url: "data.js",
+    onClick:{
+        "wxi-trash": function(event, id){
+            webix.confirm({
+                text: "Do you want to remove this film?"
+            }).then(() => {
+                    this.remove(id);
+                    $$("filmsForm").clear();
+                })
+        }
+    } 
+};
+
+const form =  {
+    view:"form",
+    id:"filmsForm",
+    width: 350,
+    elements: [
+        {template:"edit films", type:"section"},
+        {view:"text", label:"Title", name:"title", invalidMessage:"Field must be filled in"},
+        {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
+        {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
+        {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
+        {margin: 10, cols: [
+            {
+                view:"button", 
+                value:"Save", 
+                css:"webix_primary", 
+                click: addItem
+            },
+            {
+                view:"button", 
+                value:"Clear", 
+                click: clearForm
+            }
+        ]},
+        {}
+    ],
+    rules: {
+        title: webix.rules.isNotEmpty,
+        year: function(value) {
+            return (value >= 1970 && value <= 2021);
+        },
+        rating: function(value) {
+            return value > 0 && webix.rules.isNotEmpty;
+        },
+        votes: function(value) {
+            return value < 100000;
+        }
+    },
+};
+
+const productsTree = {
+    view:"treetable",
+    select:true,
+    fillspace: true,
+    url:"products.js",
+    columns: [
+        {id: "id", header:""},
+        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true},
+        {id: "price", header: "Price"}
+    ],
+    on: {
+        onAfterLoad: function() {
+            this.openAll();
+        }
+    }
+}
+
+const usersList = {
+    rows:[
         {
-            view:"list",
-            minWidth: 150,
-            width: 220,
-            scroll: false,
-            select: true,
-            css:"app-list",
-            data:[
-                {value:"Dashboard"},
-                {value:"Users"},
-                {value:"Products"},
-                {value:"Locations"},
+            cols:[
+                {
+                    view:"toolbar",
+                    rows:[
+                      {view:"text", id:"usersListFilterField"}
+                    ]
+                },
+                {
+                    view:"button", 
+                    label:"Sort asc", 
+                    css:"webix_primary", 
+                    width: 150,
+                    click: function() {
+                        $$("usersList").sort("#name#", "asc");
+                    }
+            },
+                {
+                    view:"button", 
+                    label:"Sort desc", 
+                    css:"webix_primary", 
+                    width: 150,
+                    click: function() {
+                        $$("usersList").sort("#name#", "desc");
+                    }
+                }
             ]
         },
-        {view:"resizer"},
         {
-            view:"datatable",
-            id:"filmsDatatable",
-            autoConfig: true,
-            scroll:"y",
-            data: small_film_set
-        },
-        {
-            view:"form",
-            id:"filmsForm",
-            width: 350,
-            elements: [
-                {template:"edit films", type:"section"},
-                {view:"text", label:"Title", name:"title", invalidMessage:"Field must be filled in"},
-                {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
-                {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
-                {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
-                {margin: 10, cols: [
-                    {
-                        view:"button", 
-                        value:"Add new", 
-                        css:"webix_primary", 
-                        click: addItem
-                    },
-                    {
-                        view:"button", 
-                        value:"Clear", 
-                        click: clearForm
-                    }
-                ]},
-                {}
-            ],
-            rules: {
-                title: webix.rules.isNotEmpty,
-                year: function(value) {
-                    return (value >= 1970 && value <= 2021);
-                },
-                rating: function(value) {
-                    return value > 0 && webix.rules.isNotEmpty;
-                },
-                votes: function(value) {
-                    return value < 100000;
+            view:"list",
+            id:"usersList",
+            select:true,
+            maxHeight: 250,
+            css:"users-list",
+            url:"users.js",
+            template:"#name# from #country# <span class='webix_icon wxi-close'></span>",
+            onClick:{
+                "wxi-close": function(event, id){
+                    webix.confirm({
+                        text: "Do you want to remove this user?"
+                    }).then(() => {
+                        this.remove(id);
+                    })
                 }
-            },
-        },
-    ],
+            }
+        }
+    ]
+}
+
+const usersChart = {
+    view:"chart",
+    type:"bar",
+    value:"#age#",
+    url: "users.js",
+    xAxis:{
+        title: "Age",
+        template: "#age#",
+    },
 };
-	    
+  
 const footer = {
     template:"The software is provided by <a href='https://webix.com' target='_blank'>https://webix.com</a>. All rights reserved (c)", 
     css:"app-footer", 
     height: 30
 };
+
+const multiview = {
+    view: "multiview",
+    cells: [
+        {id: "Dashboard", cols: [datatable, form]},
+        {id: "Users", rows:[usersList, usersChart]},
+        {id: "Products", cols:[productsTree]},
+        {id: "Admin", template:"Admin"}
+    ]
+}
 
 function addItem() {
     const filmsForm = $$("filmsForm");
@@ -104,9 +199,14 @@ function addItem() {
     const validationResult = filmsForm.validate();
 
     if (validationResult) {
-        filmsDatatable.add(formData);
-        webix.message("Form Successfully validated");  
-    }
+        if (formData.id) {
+            filmsDatatable.updateItem(formData.id, formData);
+        } else {
+            filmsDatatable.add(formData);
+            webix.message("Form Successfully validated");
+       }
+      filmsForm.clear();     
+   }
 }
 
 function clearForm() {
@@ -114,7 +214,7 @@ function clearForm() {
     webix.confirm({
         text: "Do you want to clear this form?"
     }).then(
-        function(){
+        function() {
             filmsForm.clear();
             filmsForm.clearValidation();  
         }
@@ -125,9 +225,9 @@ webix.ui({
     view:"popup",
     id: "profilePopup",
     width: 300,
-    autoheight: true,
     body: {
         view: "list",
+        autoheight: true,
         scroll: false,
         data: [
             {value: "Settings"},
@@ -135,11 +235,31 @@ webix.ui({
         ]
     } 
 });
-
- webix.ui({
+  
+webix.ui({
     rows: [
         header,
-        main,
+        {
+            cols:[
+                menuList,
+                resizer,
+                multiview
+            ],
+        },
         footer,
     ]
- });
+}); 
+
+$$("filmsDatatable").attachEvent("onAfterSelect", function(id){
+    const choosedFilm = this.getItem(id);
+    $$("filmsForm").setValues(choosedFilm);
+});
+
+$$("menuList").attachEvent("onAfterSelect", function(id){
+    $$(id).show();
+});
+
+$$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
+    const filterFieldValue = this.getValue();
+    $$("usersList").filter("#name#", filterFieldValue);
+});
