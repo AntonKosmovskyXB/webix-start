@@ -15,6 +15,6 @@
     justify-content: space-between;
 }
 
-.green-background {
+.users-list .webix_list_item:nth-child(-n+5) {
     background: #a5fadd;
 }

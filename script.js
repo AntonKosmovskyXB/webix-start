@@ -265,11 +265,3 @@ $$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
     const filterFieldValue = this.getValue();
     $$("usersList").filter("#name#", filterFieldValue);
 });
-
-$$("menuList").attachEvent("onAfterSelect", function() {
-    if ($$("menuList").isSelected("Users")) {
-        for (let i = 0; i < 5; i++) {
-            $$("usersList").$view.children[0].children[i].classList.add("green-background");
-        }
-    }
-});
