@@ -200,7 +200,8 @@ function addItem() {
 
     if (validationResult) {
         if (formData.id) {
-            filmsDatatable.updateItem(formData.id, formData)
+            filmsDatatable.updateItem(formData.id, formData);
+            filmsForm.clear(); 
         } else {
             filmsDatatable.add(formData);
             webix.message("Form Successfully validated");
