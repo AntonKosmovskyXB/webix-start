@@ -25,7 +25,7 @@ const menuList = {
     scroll: false,
     select: true,
     css:"app-list",
-    data:["Dashboard", "Users", "Products", "Locations"]
+    data:["Dashboard", "Users", "Products", "Admin"]
 };
 
 const resizer = {
@@ -187,7 +187,8 @@ const multiview = {
     cells: [
         {id: "Dashboard", cols: [datatable, form]},
         {id: "Users", rows:[usersList, usersChart]},
-        {id: "Products", cols:[productsTree]}
+        {id: "Products", cols:[productsTree]},
+        {id: "Admin", template:"Admin"}
     ]
 }
 
