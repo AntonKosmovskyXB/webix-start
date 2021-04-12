@@ -48,7 +48,12 @@ const datatable = {
     url: "data.js",
     onClick:{
         "wxi-trash": function(event, id){
-            this.remove(id);
+            webix.confirm({
+                text: "Do you want to remove this film?"
+            }).then(() => {
+                    this.remove(id);
+                    $$("filmsForm").clear();
+                })
         }
     } 
 };
@@ -66,7 +71,7 @@ const form =  {
         {margin: 10, cols: [
             {
                 view:"button", 
-                value:"Add new", 
+                value:"Save", 
                 css:"webix_primary", 
                 click: addItem
             },
@@ -149,7 +154,11 @@ const usersList = {
             template:"#name# from #country# <span class='webix_icon wxi-close'></span>",
             onClick:{
                 "wxi-close": function(event, id){
-                    this.remove(id);
+                    webix.confirm({
+                        text: "Do you want to remove this user?"
+                    }).then(() => {
+                        this.remove(id);
+                    })
                 }
             }
         }
@@ -193,7 +202,8 @@ function addItem() {
             filmsDatatable.updateItem(formData.id, formData)
         } else {
             filmsDatatable.add(formData);
-            webix.message("Form Successfully validated");  
+            webix.message("Form Successfully validated");
+            filmsForm.clear();  
         }   
     }
 }
@@ -245,7 +255,9 @@ $$("filmsDatatable").attachEvent("onAfterSelect", function(id){
 });
 
 $$("menuList").attachEvent("onAfterSelect", function(id){
-    $$(id).show();
+    if ($$(id)) {
+        $$(id).show();
+    }
 });
 
 $$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
