@@ -171,7 +171,6 @@ const adminView = {
             view:"datatable",
             id: "adminDatatable",
             select: true,
-            data: categoriesCollection,
             columns:[
                 {header:"Category", id:"value", fillspace:true}
             ],
@@ -252,7 +251,6 @@ const usersList = {
             select:true,
             maxHeight: 250,
             css:"users-list",
-            data: usersCollection,
             template:"#name#, #age#, from #country# <span class='webix_icon wxi-close'></span>",
             scheme:{
                 $init:function(obj) {
@@ -343,7 +341,6 @@ webix.ui({
     ],
     
 }); 
-
 
 
 $$("categoriesForm").bind($$("adminDatatable"));
