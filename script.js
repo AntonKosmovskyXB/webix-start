@@ -1,3 +1,14 @@
+const countriesList = [
+	{ "id":1, "value":"Germany" },
+	{ "id":2, "value":"USA" },
+	{ "id":3, "value":"Canada" },
+	{ "id":4, "value":"France" },
+	{ "id":5, "value":"China" },
+	{ "id":6, "value":"Russia" },
+	{ "id":7, "value":"Italy" },
+	{ "id":8, "value":"Spain" }
+]
+
 webix.protoUI({
     name:"editlist"
 }, webix.EditAbility, webix.ui.list);
@@ -209,7 +220,7 @@ const usersList = {
                 $init:function(obj) {
                     if (obj.age < 26) {
                         obj.$css = "highlight";
-                    }
+                    } 
                 },
             },
             onClick:{
@@ -248,14 +259,7 @@ const usersChart = {
         end: 10,
         step: 2
     },
-    scheme:{
-        $group:{
-            by: "country",
-            map:{
-                name:[ "name", "count" ]
-            }
-        }
-    }
+    
 };
   
 const footer = {
@@ -341,10 +345,11 @@ function clearForm() {
 }
 
 function addUser() {
+    const countryId = getRandomInt(1,8);
     $$("usersList").add({
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
-        countryId: getRandomInt(1, 8)
+        country: countriesList[countryId].value
     })
 }
 
@@ -385,3 +390,5 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
+
+$$("menuList").select("Users");
