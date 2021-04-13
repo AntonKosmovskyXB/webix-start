@@ -1,3 +1,18 @@
+const countriesList = [
+	{ "id":1, "value":"Germany" },
+	{ "id":2, "value":"USA" },
+	{ "id":3, "value":"Canada" },
+	{ "id":4, "value":"France" },
+	{ "id":5, "value":"China" },
+	{ "id":6, "value":"Russia" },
+	{ "id":7, "value":"Italy" },
+	{ "id":8, "value":"Spain" }
+]
+
+webix.protoUI({
+    name:"editlist"
+}, webix.EditAbility, webix.ui.list);
+
 const header = {
     view:"toolbar",
     css:"webix_dark",
@@ -33,29 +48,58 @@ const resizer = {
 };
         
 const datatable = {
-    view:"datatable",
-    id:"filmsDatatable",
-    hover: "row-hover",
-    select: true,
-    columns:[
-        {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
-        {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
-        {id:"year", header:["Realised", {content:"textFilter"} ], sort: "int"},
-        {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
-        {template:"<span class='webix_icon wxi-trash'></span>"},
-    ],
-    scroll:"y",
-    url: "data.js",
-    onClick:{
-        "wxi-trash": function(event, id){
-            webix.confirm({
-                text: "Do you want to remove this film?"
-            }).then(() => {
-                    this.remove(id);
-                    $$("filmsForm").clear();
-                })
+    rows:[
+        { 
+            view:"segmented", id:"filmsYearFilter",
+            options:[
+                {id:1, value:"All"},
+                {id:2, value:"Old"},
+                {id:3, value:"Modern"},
+                {id:4, value:"New"},
+            ], 
+            on:{
+                onChange:function(){
+                    $$("filmsDatatable").filterByAll();
+                }
+            }  
+        }, 
+        {
+            view:"datatable",
+            id:"filmsDatatable",
+            hover: "row-hover",
+            select: true,
+            scheme:{
+                $init:function(obj) {
+                    obj.category = getRandomInt(1, 4);
+                    const fixedVotesValue = obj.votes.replace(",", ".");
+                    const fixedRatingValue = obj.rating.replace(",", ".");
+                    obj.votes = fixedVotesValue;
+                    obj.rating = fixedRatingValue;
+                },
+            },
+            columns:[
+                {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
+                {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
+                {id:"category", header:["Category", {content:"selectFilter"} ], sort: "int", options:"categories.js"},
+                {id:"rating", header:["Rating", {content:"textFilter"} ], sort: "int"},
+                {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
+                {id:"year", header:"Year", sort: "int"},
+                {template:"<span class='webix_icon wxi-trash'></span>"},
+            ],
+            scroll:"y",
+            url: "data.js",
+            onClick:{
+                "wxi-trash": function(event, id){
+                    webix.confirm({
+                        text: "Do you want to remove this film?"
+                    }).then(() => {
+                            this.remove(id);
+                            $$("filmsForm").clear();
+                        })
+                }
+            } 
         }
-    } 
+    ]
 };
 
 const form =  {
@@ -73,7 +117,7 @@ const form =  {
                 view:"button", 
                 value:"Save", 
                 css:"webix_primary", 
-                click: addItem
+                click: saveForm
             },
             {
                 view:"button", 
@@ -101,17 +145,26 @@ const productsTree = {
     view:"treetable",
     select:true,
     fillspace: true,
+    editable: true,
     url:"products.js",
     columns: [
         {id: "id", header:""},
-        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true},
-        {id: "price", header: "Price"}
+        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true, editor: "text"},
+        {id: "price", header: "Price", editor:"text"}
     ],
     on: {
         onAfterLoad: function() {
             this.openAll();
+        },
+        onValidationError: function() {
+            webix.message("Please, fill correct data");
         }
-    }
+    },
+    rules:{
+        title: webix.rules.isNotEmpty,
+        price: webix.rules.isNumber,
+    },
+    
 }
 
 const usersList = {
@@ -141,17 +194,35 @@ const usersList = {
                     click: function() {
                         $$("usersList").sort("#name#", "desc");
                     }
-                }
+                },
+                {
+                    view:"button", 
+                    id: "addUsersButton",
+                    label:"Add new", 
+                    css:"webix_primary", 
+                    width: 150,
+                    click: addUser
+                },
             ]
         },
         {
-            view:"list",
+            view:"editlist",
             id:"usersList",
+            editable:true,
+			editor:"text",
+			editValue:"name",
             select:true,
             maxHeight: 250,
             css:"users-list",
             url:"users.js",
-            template:"#name# from #country# <span class='webix_icon wxi-close'></span>",
+            template:"#name#, #age#, from #country# <span class='webix_icon wxi-close'></span>",
+            scheme:{
+                $init:function(obj) {
+                    if (obj.age < 26) {
+                        obj.$css = "highlight";
+                    } 
+                },
+            },
             onClick:{
                 "wxi-close": function(event, id){
                     webix.confirm({
@@ -160,19 +231,32 @@ const usersList = {
                         this.remove(id);
                     })
                 }
-            }
+            },
+            rules:{
+                name: webix.rules.isNotEmpty 
+            },
+            on:{
+                onValidationError: function() {
+                    webix.message("Name should not be empty");
+                },
+            },
         }
     ]
 }
 
 const usersChart = {
     view:"chart",
+    id: "chart",
     type:"bar",
-    value:"#age#",
-    url: "users.js",
+    value: "#name#",
     xAxis:{
-        title: "Age",
-        template: "#age#",
+        title: "Country",
+        template: "#country#",
+    },
+    yAxis:{
+        start: 0,
+        end: 10,
+        step: 2
     },
 };
   
@@ -190,35 +274,6 @@ const multiview = {
         {id: "Products", cols:[productsTree]},
         {id: "Admin", template:"Admin"}
     ]
-}
-
-function addItem() {
-    const filmsForm = $$("filmsForm");
-    const filmsDatatable = $$("filmsDatatable");
-    const formData = filmsForm.getValues();
-    const validationResult = filmsForm.validate();
-
-    if (validationResult) {
-        if (formData.id) {
-            filmsDatatable.updateItem(formData.id, formData);
-        } else {
-            filmsDatatable.add(formData);
-            webix.message("Form Successfully validated");
-       }
-      filmsForm.clear();     
-   }
-}
-
-function clearForm() {
-    const filmsForm = $$("filmsForm");
-    webix.confirm({
-        text: "Do you want to clear this form?"
-    }).then(
-        function() {
-            filmsForm.clear();
-            filmsForm.clearValidation();  
-        }
-    )
 }
 
 webix.ui({
@@ -247,15 +302,79 @@ webix.ui({
             ],
         },
         footer,
-    ]
+    ],
+    
 }); 
 
-$$("filmsDatatable").attachEvent("onAfterSelect", function(id){
+$$("filmsForm").bind($$("filmsDatatable"));
+
+$$("chart").sync($$("usersList"), function() {
+    $$("chart").group({
+        by: "country",
+        map:{
+            name:[ "name", "count" ]
+        }
+    });
+});
+
+function saveForm() {
+    const validationResult = $$("filmsForm").validate();
+    
+    if (!validationResult) {
+        return false;
+    }
+    
+    $$("filmsForm").save();
+    $$("filmsForm").clear();
+    $$("filmsDatatable").unselectAll();
+}
+
+function clearForm() {
+    const filmsForm = $$("filmsForm");
+    webix.confirm({
+        text: "Do you want to clear this form?"
+    }).then(
+        function() {
+            filmsForm.clear();
+            filmsForm.clearValidation();
+            $$("filmsDatatable").unselectAll();  
+        }
+    )
+}
+
+function addUser() {
+    const countryId = getRandomInt(1,8);
+    $$("usersList").add({
+        name: $$("usersListFilterField").getValue(),
+        age: getRandomInt(18, 70),
+        country: countriesList[countryId].value
+    })
+}
+
+$$("filmsDatatable").registerFilter(
+    $$("filmsYearFilter"),
+    {columnId:"year", compare:function(value, filter, item) {
+        if (filter == 1) return +value;
+        if (filter == 2) return +value < 2000;
+        if (filter == 3) return +value >= 2000;
+        if (filter == 4) return +value == 2011; 
+    }},
+    {
+        getValue:function(node){
+            return node.getValue();
+          },
+        setValue:function(node, value){
+            node.setValue(value);
+        }
+    }
+)
+
+$$("filmsDatatable").attachEvent("onAfterSelect", function(id) {
     const choosedFilm = this.getItem(id);
     $$("filmsForm").setValues(choosedFilm);
 });
 
-$$("menuList").attachEvent("onAfterSelect", function(id){
+$$("menuList").attachEvent("onAfterSelect", function(id) {
     $$(id).show();
 });
 
@@ -263,3 +382,11 @@ $$("usersListFilterField").attachEvent("onTimedKeyPress", function() {
     const filterFieldValue = this.getValue();
     $$("usersList").filter("#name#", filterFieldValue);
 });
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; 
+}
+
+$$("menuList").select("Users");
