@@ -120,6 +120,7 @@ const form =  {
         {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
         {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
         {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
+        {view:"richselect", label:"Category", name:"category", options:categoriesCollection},
         {margin: 10, cols: [
             {
                 view:"button", 
@@ -343,11 +344,12 @@ webix.ui({
     
 }); 
 
-$$("adminDatatable").sync(categoriesCollection);
+
 
 $$("categoriesForm").bind($$("adminDatatable"));
 $$("filmsForm").bind($$("filmsDatatable"));
 
+$$("adminDatatable").sync(categoriesCollection);
 $$("usersList").sync(usersCollection);
 $$("chart").sync(usersCollection);
 
@@ -437,7 +439,7 @@ function deleteCategory() {
         text: "Do you want to remove this category?"
     }).then(
         function() {
-            $$("adminDatatable").remove(selectedItem)
+            categoriesCollection.remove(selectedItem)
             $$("adminDatatable").unselectAll();  
         }
     )
@@ -480,5 +482,3 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
-
-// $$("menuList").select("Admin");
