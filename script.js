@@ -344,8 +344,7 @@ function addUser() {
     $$("usersList").add({
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
-        countryId: getRandomInt(1, 8),
-        url: "countries.js"
+        countryId: getRandomInt(1, 8)
     })
 }
 
