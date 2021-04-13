@@ -265,6 +265,7 @@ const usersList = {
                         text: "Do you want to remove this user?"
                     }).then(() => {
                         this.remove(id);
+                        $$("usersList").editCancel();
                     })
                 }
             },
@@ -403,7 +404,9 @@ function addUser() {
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
         country: countriesList[countryId].value
-    })
+    });
+    $$("usersListFilterField").setValue("");
+    $$("usersList").filter();
 };
 
 function saveCategory() {
