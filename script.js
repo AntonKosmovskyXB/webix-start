@@ -59,13 +59,17 @@ const datatable = {
             select: true,
             scheme:{
                 $init:function(obj) {
-                    obj.categoryId = getRandomInt(1, 4);
+                    obj.category = getRandomInt(1, 4);
+                    const fixedVotesValue = obj.votes.replace(",", ".");
+                    const fixedRatingValue = obj.rating.replace(",", ".");
+                    obj.votes = fixedVotesValue;
+                    obj.rating = fixedRatingValue;
                 },
             },
             columns:[
                 {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
                 {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
-                {id:"categoryId", header:["Category", {content:"selectFilter"} ], sort: "int", options:"categories.js"},
+                {id:"category", header:["Category", {content:"selectFilter"} ], sort: "int", options:"categories.js"},
                 {id:"rating", header:["Rating", {content:"textFilter"} ], sort: "int"},
                 {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
                 {id:"year", header:"Year", sort: "int"},
@@ -130,17 +134,26 @@ const productsTree = {
     view:"treetable",
     select:true,
     fillspace: true,
+    editable: true,
     url:"products.js",
     columns: [
         {id: "id", header:""},
-        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true},
-        {id: "price", header: "Price"}
+        {id: "title", header:"Title", template:"{common.treetable()} #title#", fillspace:true, editor: "text"},
+        {id: "price", header: "Price", editor:"text"}
     ],
     on: {
         onAfterLoad: function() {
             this.openAll();
+        },
+        onValidationError: function() {
+            webix.message("Please, fill correct data");
         }
-    }
+    },
+    rules:{
+        title: webix.rules.isNotEmpty,
+        price: webix.rules.isNumber,
+    },
+    
 }
 
 const usersList = {
@@ -173,12 +186,11 @@ const usersList = {
                 },
                 {
                     view:"button", 
+                    id: "addUsersButton",
                     label:"Add new", 
                     css:"webix_primary", 
                     width: 150,
-                    click: function() {
-                        
-                    }
+                    click: addUser
                 },
             ]
         },
@@ -236,6 +248,14 @@ const usersChart = {
         end: 10,
         step: 2
     },
+    scheme:{
+        $group:{
+            by: "country",
+            map:{
+                name:[ "name", "count" ]
+            }
+        }
+    }
 };
   
 const footer = {
@@ -320,6 +340,15 @@ function clearForm() {
     )
 }
 
+function addUser() {
+    $$("usersList").add({
+        name: $$("usersListFilterField").getValue(),
+        age: getRandomInt(18, 70),
+        countryId: getRandomInt(1, 8),
+        url: "countries.js"
+    })
+}
+
 $$("filmsDatatable").registerFilter(
     $$("filmsYearFilter"),
     {columnId:"year", compare:function(value, filter, item) {
@@ -358,4 +387,4 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
 
-$$("menuList").select("Users");
+// $$("menuList").select("Users");
