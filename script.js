@@ -249,7 +249,6 @@ const usersChart = {
     id: "chart",
     type:"bar",
     value: "#name#",
-    url: "users.js",
     xAxis:{
         title: "Country",
         template: "#country#",
@@ -259,7 +258,6 @@ const usersChart = {
         end: 10,
         step: 2
     },
-    
 };
   
 const footer = {
@@ -349,7 +347,7 @@ function addUser() {
     $$("usersList").add({
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
-        country: countriesList[countryId].value
+        country: countriesList[columnId].value
     })
 }
 
