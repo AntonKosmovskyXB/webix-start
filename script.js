@@ -436,7 +436,8 @@ function deleteCategory() {
         text: "Do you want to remove this category?"
     }).then(
         function() {
-            categoriesCollection.remove(selectedItem)
+            categoriesCollection.remove(selectedItem);
+            $$("categoriesForm").clear();
             $$("adminDatatable").unselectAll();  
         }
     )
