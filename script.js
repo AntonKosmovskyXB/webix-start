@@ -438,7 +438,6 @@ function deleteCategory() {
         function() {
             categoriesCollection.remove(selectedItem);
             $$("categoriesForm").clear();
-            $$("adminDatatable").unselectAll();  
         }
     )
 }
