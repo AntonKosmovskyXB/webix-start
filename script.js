@@ -10,11 +10,26 @@ const countriesList = [
 ]
 
 const categoriesCollection = new webix.DataCollection({
-    url: "categories.js"
+    url: "categories.js",
 });
 
 const usersCollection = new webix.DataCollection({
-    url:"users.js"
+    url:"users.js",
+    scheme:{
+        $init:function(obj) {
+            if (obj.age < 26) {
+                obj.$css = "highlight";
+            } 
+        },
+    },
+    rules:{
+        name: webix.rules.isNotEmpty 
+    },
+    on:{
+        onValidationError: function() {
+            webix.message("Name should not be empty");
+        },
+    },
 }); 
 
 webix.protoUI({
@@ -102,8 +117,8 @@ const datatable = {
                         text: "Do you want to remove this film?"
                     }).then(() => {
                             this.remove(id);
-                            $$("filmsForm").clear();
-                        })
+                        });
+                    return false;
                 }
             } 
         }
@@ -247,35 +262,19 @@ const usersList = {
             id:"usersList",
             editable:true,
 			editor:"text",
-			editValue:"name",
             select:true,
             maxHeight: 250,
             css:"users-list",
             template:"#name#, #age#, from #country# <span class='webix_icon wxi-close'></span>",
-            scheme:{
-                $init:function(obj) {
-                    if (obj.age < 26) {
-                        obj.$css = "highlight";
-                    } 
-                },
-            },
             onClick:{
                 "wxi-close": function(event, id){
                     webix.confirm({
                         text: "Do you want to remove this user?"
                     }).then(() => {
-                        this.remove(id);
-                        $$("usersList").editCancel();
-                    })
+                        usersCollection.remove(id);
+                    });
+                    return false;
                 }
-            },
-            rules:{
-                name: webix.rules.isNotEmpty 
-            },
-            on:{
-                onValidationError: function() {
-                    webix.message("Name should not be empty");
-                },
             },
         }
     ]
@@ -349,9 +348,8 @@ $$("filmsForm").bind($$("filmsDatatable"));
 
 $$("adminDatatable").sync(categoriesCollection);
 $$("usersList").sync(usersCollection);
-$$("chart").sync(usersCollection);
 
-$$("chart").sync($$("usersList"), function() {
+$$("chart").sync($$(usersCollection), function() {
     $$("chart").group({
         by: "country",
         map:{
@@ -400,11 +398,12 @@ function clearCategoriesForm() {
 
 function addUser() {
     const countryId = getRandomInt(1,8);
-    $$("usersList").add({
+    usersCollection.add({
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
         country: countriesList[countryId].value
     });
+
     $$("usersListFilterField").setValue("");
     $$("usersList").filter();
 };
@@ -482,3 +481,5 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
+
+$$("menuList").select("Users")
