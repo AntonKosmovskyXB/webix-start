@@ -9,6 +9,29 @@ const countriesList = [
 	{ "id":8, "value":"Spain" }
 ]
 
+const categoriesCollection = new webix.DataCollection({
+    url: "categories.js",
+});
+
+const usersCollection = new webix.DataCollection({
+    url:"users.js",
+    scheme:{
+        $init:function(obj) {
+            if (obj.age < 26) {
+                obj.$css = "highlight";
+            } 
+        },
+    },
+    rules:{
+        name: webix.rules.isNotEmpty 
+    },
+    on:{
+        onValidationError: function() {
+            webix.message("Name should not be empty");
+        },
+    },
+}); 
+
 webix.protoUI({
     name:"editlist"
 }, webix.EditAbility, webix.ui.list);
@@ -80,7 +103,7 @@ const datatable = {
             columns:[
                 {id:"rank", header:"", css:"webix_ss_header", maxWidth: 40, sort: "int"},
                 {id:"title", header:["Film title", {content:"textFilter"} ], fillspace: true, sort: "text"},
-                {id:"category", header:["Category", {content:"selectFilter"} ], sort: "int", options:"categories.js"},
+                {id:"category", header:["Category", {content:"selectFilter"} ], sort: "int", collection:categoriesCollection},
                 {id:"rating", header:["Rating", {content:"textFilter"} ], sort: "int"},
                 {id:"votes", header:["Votes", {content:"textFilter"} ], sort: "int"},
                 {id:"year", header:"Year", sort: "int"},
@@ -94,8 +117,8 @@ const datatable = {
                         text: "Do you want to remove this film?"
                     }).then(() => {
                             this.remove(id);
-                            $$("filmsForm").clear();
-                        })
+                        });
+                    return false;
                 }
             } 
         }
@@ -112,6 +135,7 @@ const form =  {
         {view:"text", label:"Year", name:"year", invalidMessage:"Enter year between 1970 and 2021"},
         {view:"text", label:"Rating", name:"rating", invalidMessage:"Field must be filled in and not equal 0"},
         {view:"text", label:"Votes", name:"votes", invalidMessage:"Enter number less than 100000"},
+        {view:"richselect", label:"Category", name:"category", options:categoriesCollection},
         {margin: 10, cols: [
             {
                 view:"button", 
@@ -140,6 +164,34 @@ const form =  {
         }
     },
 };
+
+const adminView = {
+    rows:[
+        {
+            view:"form",
+            id:"categoriesForm",
+            cols:[
+                {
+                    view:"text", 
+                    name:"value", 
+                    id:"categoryValue", 
+                    validate:webix.rules.isNotEmpty, 
+                },
+                {view:"button", value:"Save", css:"webix_primary", click: saveCategory},
+                {view:"button", value:"Delete", css:"webix_primary", click: deleteCategory},
+                {view:"button", value:"Clear form", css:"webix_primary", click: clearCategoriesForm},
+            ]
+        },
+        {
+            view:"datatable",
+            id: "adminDatatable",
+            select: true,
+            columns:[
+                {header:"Category", id:"value", fillspace:true}
+            ],
+        }
+    ]
+}
 
 const productsTree = {
     view:"treetable",
@@ -210,35 +262,19 @@ const usersList = {
             id:"usersList",
             editable:true,
 			editor:"text",
-			editValue:"name",
             select:true,
             maxHeight: 250,
             css:"users-list",
-            url:"users.js",
             template:"#name#, #age#, from #country# <span class='webix_icon wxi-close'></span>",
-            scheme:{
-                $init:function(obj) {
-                    if (obj.age < 26) {
-                        obj.$css = "highlight";
-                    } 
-                },
-            },
             onClick:{
                 "wxi-close": function(event, id){
                     webix.confirm({
                         text: "Do you want to remove this user?"
                     }).then(() => {
-                        this.remove(id);
-                    })
+                        usersCollection.remove(id);
+                    });
+                    return false;
                 }
-            },
-            rules:{
-                name: webix.rules.isNotEmpty 
-            },
-            on:{
-                onValidationError: function() {
-                    webix.message("Name should not be empty");
-                },
             },
         }
     ]
@@ -272,7 +308,7 @@ const multiview = {
         {id: "Dashboard", cols: [datatable, form]},
         {id: "Users", rows:[usersList, usersChart]},
         {id: "Products", cols:[productsTree]},
-        {id: "Admin", template:"Admin"}
+        {id: "Admin", cols:[adminView]}
     ]
 }
 
@@ -306,9 +342,14 @@ webix.ui({
     
 }); 
 
+
+$$("categoriesForm").bind($$("adminDatatable"));
 $$("filmsForm").bind($$("filmsDatatable"));
 
-$$("chart").sync($$("usersList"), function() {
+$$("adminDatatable").sync(categoriesCollection);
+$$("usersList").sync(usersCollection);
+
+$$("chart").sync($$(usersCollection), function() {
     $$("chart").group({
         by: "country",
         map:{
@@ -327,7 +368,7 @@ function saveForm() {
     $$("filmsForm").save();
     $$("filmsForm").clear();
     $$("filmsDatatable").unselectAll();
-}
+};
 
 function clearForm() {
     const filmsForm = $$("filmsForm");
@@ -340,15 +381,67 @@ function clearForm() {
             $$("filmsDatatable").unselectAll();  
         }
     )
+};
+
+function clearCategoriesForm() {
+    const categoriesForm = $$("categoriesForm");
+    webix.confirm({
+        text: "Do you want to clear this form?"
+    }).then(
+        function() {
+            categoriesForm.clear();
+            categoriesForm.clearValidation();
+            $$("adminDatatable").unselectAll();  
+        }
+    )
 }
 
 function addUser() {
     const countryId = getRandomInt(1,8);
-    $$("usersList").add({
+    usersCollection.add({
         name: $$("usersListFilterField").getValue(),
         age: getRandomInt(18, 70),
         country: countriesList[countryId].value
-    })
+    });
+
+    $$("usersListFilterField").setValue("");
+    $$("usersList").filter();
+};
+
+function saveCategory() {
+    const validationResult = $$("categoriesForm").validate();
+    const currentResult = $$("categoriesForm").getValues();
+    const selectedItem = $$("adminDatatable").getSelectedId();
+
+    if (!validationResult) {
+        webix.message("Please, enter the category");
+        return false;
+    }
+
+    if (selectedItem) {
+        categoriesCollection.updateItem(selectedItem, currentResult);
+    } else {
+        categoriesCollection.add(currentResult);
+    }
+
+    $$("categoriesForm").clear();
+    $$("adminDatatable").unselectAll();
+}
+
+function deleteCategory() {
+    const selectedItem = $$("adminDatatable").getSelectedId();
+    if (!selectedItem) {
+        return false;
+    }
+
+    webix.confirm({
+        text: "Do you want to remove this category?"
+    }).then(
+        function() {
+            categoriesCollection.remove(selectedItem);
+            $$("categoriesForm").clear();
+        }
+    )
 }
 
 $$("filmsDatatable").registerFilter(
@@ -388,5 +481,3 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
-
-$$("menuList").select("Users");
